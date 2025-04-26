@@ -7,8 +7,14 @@
 namespace GLog {
 enum LOG_LEVEL { LOG_ERROR, LOG_WARNING, LOG_DEBUG, LOG_TRACE };
 
-static const std::atomic<LOG_LEVEL> CURRENT_LOG_LEVEL = LOG_DEBUG;
-static std::mutex LogMutex; 
+static bool SET_LOG_LEVEL = false;
+static std::atomic<LOG_LEVEL> CURRENT_LOG_LEVEL;
+static std::mutex LOG_MUTEX;
+
+inline void SetLogLevel(LOG_LEVEL _level) {
+  SET_LOG_LEVEL = true;
+  CURRENT_LOG_LEVEL = _level;
+}
 
 static inline std::string GetTime() {
   char buffer[32];
@@ -23,6 +29,10 @@ static inline std::string GetTime() {
 };
 
 inline void Log(LOG_LEVEL _level, const std::string &_message) {
+  if (!SET_LOG_LEVEL) {
+    SetLogLevel(LOG_LEVEL::LOG_ERROR);
+  }
+
   std::string output;
 
   if (_level <= CURRENT_LOG_LEVEL) {
@@ -46,13 +56,13 @@ inline void Log(LOG_LEVEL _level, const std::string &_message) {
 
     output += _message;
 
-    LogMutex.lock();
+    LOG_MUTEX.lock();
     if (_level < LOG_LEVEL::LOG_WARNING) {
       std::cout << output << std::endl;
     } else {
       std::cerr << output << std::endl;
     }
-    LogMutex.unlock();
+    LOG_MUTEX.unlock();
   }
 }
 } // namespace Log
