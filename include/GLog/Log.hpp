@@ -38,16 +38,16 @@ inline void Log(LOG_LEVEL _level, const std::string &_message) {
   if (_level <= CURRENT_LOG_LEVEL) {
     switch (_level) {
       case LOG_LEVEL::LOG_ERROR:
-        output += "[ERROR][" + GetTime() + "] : ";
+        output += "\x1B[1;3;31m[ERROR][" + GetTime() + "] : \x1B[0m";
         break;
       case LOG_LEVEL::LOG_WARNING:
-        output += "[WARNING][" + GetTime() + "] : ";
+        output += "\x1B[1;3;35m[WARNING][" + GetTime() + "] : \x1B[0m";
         break;
       case LOG_LEVEL::LOG_DEBUG:
-        output += "[DEBUG][" + GetTime() + "] : ";
+        output += "\x1B[1;3;32m[DEBUG][" + GetTime() + "] : \x1B[0m";
         break;
       case LOG_LEVEL::LOG_TRACE:
-        output += "[TRACE][" + GetTime() + "] : ";
+        output += "\x1B[1;3;34m[TRACE][" + GetTime() + "] : \x1B[0m";
         break;
       default:
         output += "[UNKOWN][" + GetTime() + "] : ";
