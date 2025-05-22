@@ -6,7 +6,7 @@
 #include <string>
 
 namespace GLog {
-enum LOG_LEVEL { LOG_ERROR, LOG_WARNING, LOG_DEBUG, LOG_TRACE };
+enum LOG_LEVEL { LOG_PRINT, LOG_ERROR, LOG_WARNING, LOG_DEBUG, LOG_TRACE };
 
 static std::string LOG_PREFIX = "";
 static bool SET_LOG_LEVEL = false;
@@ -48,6 +48,9 @@ inline void Log(LOG_LEVEL _level, const std::string &_message) {
 
   if (_level <= CURRENT_LOG_LEVEL) {
     switch (_level) {
+      case LOG_LEVEL::LOG_PRINT:
+        output.clear();
+        break;
       case LOG_LEVEL::LOG_ERROR:
         output += "\x1B[1;3;31m[ERROR][" + GetTime() + "] : \x1B[0m";
         break;
@@ -66,13 +69,9 @@ inline void Log(LOG_LEVEL _level, const std::string &_message) {
     }
 
     output += _message;
-
-    if (_level < LOG_LEVEL::LOG_WARNING) {
-      std::cout << output << std::endl;
-    } else {
-      std::cerr << output << std::endl;
-    }
-    LOG_MUTEX.unlock();
+    std::cout << output << std::endl;
   }
+
+  LOG_MUTEX.unlock();
 }
 } // namespace Log
