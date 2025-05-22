@@ -3,17 +3,27 @@
 #include <iostream>
 #include <mutex>
 #include <atomic>
+#include <string>
 
 namespace GLog {
 enum LOG_LEVEL { LOG_ERROR, LOG_WARNING, LOG_DEBUG, LOG_TRACE };
 
+static std::string LOG_PREFIX = "";
 static bool SET_LOG_LEVEL = false;
 static std::atomic<LOG_LEVEL> CURRENT_LOG_LEVEL;
 static std::mutex LOG_MUTEX;
 
+inline void SetLogPrefix(const std::string _prefix) {
+  LOG_MUTEX.lock();
+  LOG_PREFIX = _prefix;
+  LOG_MUTEX.unlock();
+}
+
 inline void SetLogLevel(LOG_LEVEL _level) {
+  LOG_MUTEX.lock();
   SET_LOG_LEVEL = true;
   CURRENT_LOG_LEVEL = _level;
+  LOG_MUTEX.unlock();
 }
 
 static inline std::string GetTime() {
@@ -33,7 +43,8 @@ inline void Log(LOG_LEVEL _level, const std::string &_message) {
     SetLogLevel(LOG_LEVEL::LOG_ERROR);
   }
 
-  std::string output;
+  LOG_MUTEX.lock();
+  std::string output = LOG_PREFIX;
 
   if (_level <= CURRENT_LOG_LEVEL) {
     switch (_level) {
@@ -56,7 +67,6 @@ inline void Log(LOG_LEVEL _level, const std::string &_message) {
 
     output += _message;
 
-    LOG_MUTEX.lock();
     if (_level < LOG_LEVEL::LOG_WARNING) {
       std::cout << output << std::endl;
     } else {
